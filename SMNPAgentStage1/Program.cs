@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using MIBParser;
 
 namespace SMNPAgentStage1
 {
@@ -10,6 +12,12 @@ namespace SMNPAgentStage1
     {
         static void Main(string[] args)
         {
+            var fileReader = new FileReader();
+
+            var importsLoader = new ImportsLoader(fileReader);
+            importsLoader.GetAllFiles(ParserConst.MIBPath);
+            
+            Console.ReadKey();
         }
     }
 }
