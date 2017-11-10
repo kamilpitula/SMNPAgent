@@ -19,7 +19,7 @@ namespace MIBParser
 
         public void GetAllFiles(string path)
         {
-            var text = fileReader.GetEntireFileText(path);
+            var text = fileReader.GetFileEntireText(path);
             var imports = ParseImports(text);
             foreach (var import in imports)
             {

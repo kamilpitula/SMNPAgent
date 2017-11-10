@@ -8,7 +8,7 @@ namespace MIBParser
 {
     public interface IFileReader
     {
-        string GetEntireFileText(string filePath);
+        string GetFileEntireText(string filePath);
         IEnumerable<string> GetLine(string filePath);
     }
 }

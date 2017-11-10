@@ -8,7 +8,7 @@ namespace MIBParser
 {
     public static class ParserConst
     {
-        public static string MIBPath = @"..\..\..\MIBs\NET-SNMP-EXAMPLES-MIB.txt";
+        public static string MIBPath = @"..\..\..\MIBs\RFC1213-MIB.txt";
     }
 
 }

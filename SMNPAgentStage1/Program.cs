@@ -14,9 +14,12 @@ namespace SMNPAgentStage1
         {
             var fileReader = new FileReader();
 
-            var importsLoader = new ImportsLoader(fileReader);
-            importsLoader.GetAllFiles(ParserConst.MIBPath);
+            //var importsLoader = new ImportsLoader(fileReader);
+            //importsLoader.GetAllFiles(ParserConst.MIBPath);
             
+            var parser = new Parser(fileReader);
+            parser.GenerateTree();
+
             Console.ReadKey();
         }
     }

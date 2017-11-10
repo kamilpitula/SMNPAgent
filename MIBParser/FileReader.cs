@@ -9,7 +9,7 @@ namespace MIBParser
 {
     public class FileReader : IFileReader
     {
-        public string GetEntireFileText(string filePath)
+        public string GetFileEntireText(string filePath)
         {
             return File.ReadAllText(filePath);
         }
