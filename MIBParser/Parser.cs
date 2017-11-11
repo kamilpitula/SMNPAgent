@@ -40,15 +40,14 @@ namespace MIBParser
             var masterNode = new MIBNode(1, "ISO", null);
             masterNode.AddChild(new MIBNode(3, "org", masterNode));
 
-            var org = masterNode.GetMibNodeStack().Where(node => node.NodeName == "org").FirstOrDefault();
-            org.AddChild(new MIBNode(6, "dod", org));
+            var org = masterNode.GetMibNodeStack().FirstOrDefault(node => node.NodeName == "org");
+            org?.AddChild(new MIBNode(6, "dod", org));
 
-            var dod = masterNode.GetMibNodeStack().Where(node => node.NodeName == "dod").FirstOrDefault();
-            dod.AddChild(new MIBNode(1, "internet", dod));
+            var dod = masterNode.GetMibNodeStack().FirstOrDefault(node => node.NodeName == "dod");
+            dod?.AddChild(new MIBNode(1, "internet", dod));
 
-            var internet = masterNode.GetMibNodeStack().Where(node => node.NodeName == "internet").FirstOrDefault();
-            internet.AddChild(new MIBNode(2, "mgmt", internet));
-
+            var internet = masterNode.GetMibNodeStack().FirstOrDefault(node => node.NodeName == "internet");
+            internet?.AddChild(new MIBNode(2, "mgmt", internet));
 
 
             string mibText = fileReader.GetFileEntireText(ParserConst.MIBPath);
@@ -64,9 +63,8 @@ namespace MIBParser
                 string valueString = groups["parent"].ToString().Split(' ')[2].Trim(' ');
                 var value = int.Parse(valueString);
 
-                //Console.WriteLine("Nazwa: {0}, Parent: {1}, Numer: {2}",groups["name"].ToString(),parent,value);
-                var parentNode = masterNode.GetMibNodeStack().Where(node => node.NodeName == parent).FirstOrDefault();
-                parentNode.AddChild(new MIBNode(value, name, parentNode));
+                var parentNode = masterNode.GetMibNodeStack().FirstOrDefault(node => node.NodeName == parent);
+                parentNode?.AddChild(new MIBNode(value, name, parentNode));
             }
 
             var objectTypeMatch = ObjectTypeRegex.Matches(mibText);
@@ -86,17 +84,9 @@ namespace MIBParser
                     var idParsed = int.Parse(id.ToString());
 
                     var parentNode = masterNode.GetMibNodeStack().FirstOrDefault(node => node.NodeName == parentName.ToString());
-                    if (parentNode != null)
-                    {
-                        parentNode.AddChild(new MIBNode(idParsed,name.ToString(),parentNode));
-                    }
+                    parentNode?.AddChild(new MIBNode(idParsed,name.ToString(),parentNode));
                 }
-
-
-
-               // Console.WriteLine($"Name: {name}, type: {typeOfNode}, access: {access}, status: {status}, description: {description}, parent: {parentName}, Id: {id}");
             }
-
 
             return masterNode;
         }

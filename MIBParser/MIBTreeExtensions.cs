@@ -18,7 +18,7 @@ namespace MIBParser
             }
         }
 
-        public static string GetString(this MIBNode root, string nodeName = null)
+        public static string GetLastChildrenString(this MIBNode root, string nodeName = null)
         {
             var builder = new StringBuilder();
 
@@ -34,9 +34,31 @@ namespace MIBParser
                 {
                     BuildString(builder, child);
                 }
-                builder.Append(child.GetString(nodeName));
+                builder.Append(child.GetLastChildrenString(nodeName));
 
             }
+
+            return builder.ToString();
+        }
+
+        public static string GetTreeString(this MIBNode root,string indent, bool last)
+        {
+            var builder = new StringBuilder();
+            builder.Append(indent);
+            if (last)
+            {
+                builder.Append("\\-");
+                indent += "  ";
+            }
+            else
+            {
+                builder.Append("|-");
+                indent += "| ";
+            }
+            builder.Append(root.NodeId).Append(". ").AppendLine(root.NodeName);
+
+            for (int i = 0; i < root.Children.Count; i++)
+                builder.Append(root.Children[i].GetTreeString(indent, i == root.Children.Count - 1));
 
             return builder.ToString();
         }

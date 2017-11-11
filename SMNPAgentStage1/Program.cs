@@ -18,7 +18,8 @@ namespace SMNPAgentStage1
             var parser = new Parser(fileReader);
             var root = parser.GenerateTree();
 
-            Console.WriteLine(root.GetString());
+            Console.WriteLine(root.GetTreeString("",true));
+            //Console.WriteLine(root.GetString());
 
             Console.ReadKey();
         }
