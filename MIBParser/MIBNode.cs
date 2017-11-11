@@ -8,21 +8,20 @@ namespace MIBParser
 {
     public class MIBNode
     {
-        private List<MIBNode> children;
-        private int nodeId;
-        private string nodeName;
+        public List<MIBNode> Children { get; private set; }
+        public int NodeId { get; private set; }
+        public string NodeName { get; private set; }
 
-        public MIBNode(List<MIBNode> children, int nodeId, string nodeName)
+        public MIBNode(int nodeId, string nodeName)
         {
-            this.children = children;
-            this.nodeId = nodeId;
-            this.nodeName = nodeName;
-            children = new List<MIBNode>();
+            NodeId = nodeId;
+            NodeName = nodeName;
+            Children = new List<MIBNode>();
         }
 
         public void AddChild(MIBNode child)
         {
-            children.Add(child);
+            Children.Add(child);
         }
     }
 }

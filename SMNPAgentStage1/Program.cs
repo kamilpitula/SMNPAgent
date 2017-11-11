@@ -12,13 +12,15 @@ namespace SMNPAgentStage1
     {
         static void Main(string[] args)
         {
+
             var fileReader = new FileReader();
 
             //var importsLoader = new ImportsLoader(fileReader);
-            //importsLoader.GetAllFiles(ParserConst.MIBPath);
-            
+            //importsLoader.GetAllFiles(ParserConst.MIBPath);L
+
+
             var parser = new Parser(fileReader);
-            parser.GenerateTree();
+            var root = parser.GenerateTree();
 
             Console.ReadKey();
         }

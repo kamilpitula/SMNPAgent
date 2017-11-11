@@ -44,6 +44,7 @@
     <Compile Include="IFileReader.cs" />
     <Compile Include="Import.cs" />
     <Compile Include="ImportsLoader.cs" />
+    <Compile Include="MIBTreeExtensions.cs" />
     <Compile Include="MIBNode.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="ParserConst.cs" />
