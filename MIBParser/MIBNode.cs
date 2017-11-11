@@ -9,14 +9,16 @@ namespace MIBParser
     public class MIBNode
     {
         public List<MIBNode> Children { get; private set; }
+        public MIBNode Parent { get; private set; }
         public int NodeId { get; private set; }
         public string NodeName { get; private set; }
 
-        public MIBNode(int nodeId, string nodeName)
+        public MIBNode(int nodeId, string nodeName,MIBNode parent)
         {
             NodeId = nodeId;
             NodeName = nodeName;
             Children = new List<MIBNode>();
+            Parent = parent;
         }
 
         public void AddChild(MIBNode child)

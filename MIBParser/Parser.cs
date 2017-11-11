@@ -35,17 +35,17 @@ namespace MIBParser
         public MIBNode GenerateTree()
         {
             //Hardcoded roots of the tree
-            var masterNode = new MIBNode(1, "ISO");
-            masterNode.AddChild(new MIBNode(3, "org"));
+            var masterNode = new MIBNode(1, "ISO",null);
+            masterNode.AddChild(new MIBNode(3, "org",masterNode));
 
             var org = masterNode.GetMibNodeStack().Where(node=>node.NodeName=="org").FirstOrDefault();
-            org.AddChild(new MIBNode(6,"dod"));
+            org.AddChild(new MIBNode(6,"dod",org));
 
             var dod = masterNode.GetMibNodeStack().Where(node => node.NodeName == "dod").FirstOrDefault();
-            dod.AddChild(new MIBNode(1, "internet"));
+            dod.AddChild(new MIBNode(1, "internet",dod));
 
             var internet = masterNode.GetMibNodeStack().Where(node => node.NodeName == "internet").FirstOrDefault();
-            internet.AddChild(new MIBNode(2, "mgmt"));
+            internet.AddChild(new MIBNode(2, "mgmt",internet));
             
             
 
@@ -64,7 +64,7 @@ namespace MIBParser
 
                 //Console.WriteLine("Nazwa: {0}, Parent: {1}, Numer: {2}",groups["name"].ToString(),parent,value);
                 var parentNode = masterNode.GetMibNodeStack().Where(node => node.NodeName == parent).FirstOrDefault();
-                parentNode.AddChild(new MIBNode(value,name));
+                parentNode.AddChild(new MIBNode(value,name,parentNode));
             }
             return masterNode;
         }
