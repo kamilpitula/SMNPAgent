@@ -18,24 +18,24 @@ namespace MIBParser
             }
         }
 
-        public static string GetString(this MIBNode root, string nodeName=null)
+        public static string GetString(this MIBNode root, string nodeName = null)
         {
             var builder = new StringBuilder();
 
 
             foreach (var child in root.Children)
             {
-                if (String.IsNullOrEmpty(nodeName)&&child.Children.Count==0)
+                if (String.IsNullOrEmpty(nodeName) && child.Children.Count == 0)
                 {
                     BuildString(builder, child);
                 }
-                
+
                 if (child.NodeName == nodeName)
                 {
                     BuildString(builder, child);
                 }
                 builder.Append(child.GetString(nodeName));
-                
+
             }
 
             return builder.ToString();
@@ -54,9 +54,10 @@ namespace MIBParser
             for (int j = idList.Count - 1; j >= 0; j--)
             {
                 builder.Append(idList[j].ToString());
-                if (j != 0)
-                    builder.Append('.');
+
+                builder.Append('.');
             }
+            builder.Append(child.NodeId);
             builder.Append(' ');
             builder.AppendLine(child.NodeName);
         }

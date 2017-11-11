@@ -15,10 +15,6 @@ namespace SMNPAgentStage1
 
             var fileReader = new FileReader();
 
-            //var importsLoader = new ImportsLoader(fileReader);
-            //importsLoader.GetAllFiles(ParserConst.MIBPath);L
-
-
             var parser = new Parser(fileReader);
             var root = parser.GenerateTree();
 

@@ -78,15 +78,32 @@ namespace MIBParser
                 var access = TypeOfAccess.Match(objectTypeText).Groups["access"];
                 var status = Status.Match(objectTypeText).Groups["status"];
                 var description = Description.Match(objectTypeText).Groups["description"];
-                var parent = ParentAndId.Match(objectTypeText).Groups["parent"];
+                var parentName = ParentAndId.Match(objectTypeText).Groups["parent"];
                 var id = ParentAndId.Match(objectTypeText).Groups["parentId"];
 
-                Console.WriteLine($"Name: {name}, type: {typeOfNode}, access: {access}, status: {status}, description: {description}, parent: {parent}, Id: {id}");
+                if (IsObjectComplete(name, typeOfNode, access, status, parentName, id))
+                {
+                    var idParsed = int.Parse(id.ToString());
+
+                    var parentNode = masterNode.GetMibNodeStack().FirstOrDefault(node => node.NodeName == parentName.ToString());
+                    if (parentNode != null)
+                    {
+                        parentNode.AddChild(new MIBNode(idParsed,name.ToString(),parentNode));
+                    }
+                }
+
+
+
+               // Console.WriteLine($"Name: {name}, type: {typeOfNode}, access: {access}, status: {status}, description: {description}, parent: {parentName}, Id: {id}");
             }
 
 
             return masterNode;
         }
 
+        private bool IsObjectComplete(Group name, Group typeOfNode, Group access, Group status, Group parent, Group id)
+        {
+            return !(string.IsNullOrEmpty(name.ToString()) && string.IsNullOrEmpty(typeOfNode.ToString()) && string.IsNullOrEmpty(access.ToString()) && string.IsNullOrEmpty(status.ToString()) && string.IsNullOrEmpty(parent.ToString()) && string.IsNullOrEmpty(id.ToString()));
+        }
     }
 }
