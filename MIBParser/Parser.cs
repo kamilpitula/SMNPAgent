@@ -10,13 +10,15 @@ namespace MIBParser
     public class Parser
     {
         Regex ObjectIdentifierRegex = new Regex(@"(?<name>.*)OBJECT IDENTIFIER ::= {(?<parent>.*)}");
-        Regex ObjectTypeRegex = new Regex(@"(?=[a-z|A-Z](.*)OBJECT-TYPE\n)(?s).*?(?>::= { [a-z|A-Z|0-9]* [0-9]* })");
+        Regex ObjectTypeRegex = new Regex(@"(?=[a-z|A-Z](.*)OBJECT-TYPE)(?s).*?(?>::= { [a-z|A-Z|0-9]* [0-9]* })");
 
-        Regex NameOfNode = new Regex(@"(.*)(?= OBJECT-TYPE)");
-        Regex TypeOfNode = new Regex(@"(?<=SYNTAX  )(.*)");
-        Regex TypeOfAccess = new Regex(@"(?<=ACCESS  )(.*)");
-        Regex ParentAndId = new Regex(@"(?<=::= { )(.*) ");
-        Regex SplitSpace = new Regex(@"[a-z|A-Z|0-9]*(?= )");
+        Regex NameOfNode = new Regex(@"((?<name>.*)OBJECT-TYPE)");
+        Regex TypeOfNode = new Regex(@"(?<=SYNTAX  )(?<syntax>.*)");
+        Regex TypeOfAccess = new Regex(@"(?<=ACCESS  )(?<access>.*)");
+        Regex Status = new Regex(@"(?<=STATUS  )(?<status>.*)");
+        Regex Description = new Regex(@"(?<=DESCRIPTION  )(?<description>.*)");
+        Regex ParentAndId = new Regex(@"(?<=::= { )(?<parent>.*) (?<parentId>\d+)");
+        //Regex SplitSpace = new Regex(@"[a-z|A-Z|0-9]*(?= )");
 
         Regex ComplexTypeOfNode = new Regex(@"(?=(.*)SYNTAX(.*)\n)(?s).*?(?>})");
         Regex SplitLines = new Regex(@"(?<=)([a-z].*)(?=\))");
@@ -35,19 +37,19 @@ namespace MIBParser
         public MIBNode GenerateTree()
         {
             //Hardcoded roots of the tree
-            var masterNode = new MIBNode(1, "ISO",null);
-            masterNode.AddChild(new MIBNode(3, "org",masterNode));
+            var masterNode = new MIBNode(1, "ISO", null);
+            masterNode.AddChild(new MIBNode(3, "org", masterNode));
 
-            var org = masterNode.GetMibNodeStack().Where(node=>node.NodeName=="org").FirstOrDefault();
-            org.AddChild(new MIBNode(6,"dod",org));
+            var org = masterNode.GetMibNodeStack().Where(node => node.NodeName == "org").FirstOrDefault();
+            org.AddChild(new MIBNode(6, "dod", org));
 
             var dod = masterNode.GetMibNodeStack().Where(node => node.NodeName == "dod").FirstOrDefault();
-            dod.AddChild(new MIBNode(1, "internet",dod));
+            dod.AddChild(new MIBNode(1, "internet", dod));
 
             var internet = masterNode.GetMibNodeStack().Where(node => node.NodeName == "internet").FirstOrDefault();
-            internet.AddChild(new MIBNode(2, "mgmt",internet));
-            
-            
+            internet.AddChild(new MIBNode(2, "mgmt", internet));
+
+
 
             string mibText = fileReader.GetFileEntireText(ParserConst.MIBPath);
 
@@ -64,8 +66,25 @@ namespace MIBParser
 
                 //Console.WriteLine("Nazwa: {0}, Parent: {1}, Numer: {2}",groups["name"].ToString(),parent,value);
                 var parentNode = masterNode.GetMibNodeStack().Where(node => node.NodeName == parent).FirstOrDefault();
-                parentNode.AddChild(new MIBNode(value,name,parentNode));
+                parentNode.AddChild(new MIBNode(value, name, parentNode));
             }
+
+            var objectTypeMatch = ObjectTypeRegex.Matches(mibText);
+            foreach (Match match in objectTypeMatch)
+            {
+                var objectTypeText = match.Value;
+                var name = NameOfNode.Match(objectTypeText).Groups["name"];
+                var typeOfNode = TypeOfNode.Match(objectTypeText).Groups["syntax"];
+                var access = TypeOfAccess.Match(objectTypeText).Groups["access"];
+                var status = Status.Match(objectTypeText).Groups["status"];
+                var description = Description.Match(objectTypeText).Groups["description"];
+                var parent = ParentAndId.Match(objectTypeText).Groups["parent"];
+                var id = ParentAndId.Match(objectTypeText).Groups["parentId"];
+
+                Console.WriteLine($"Name: {name}, type: {typeOfNode}, access: {access}, status: {status}, description: {description}, parent: {parent}, Id: {id}");
+            }
+
+
             return masterNode;
         }
 

@@ -11,7 +11,7 @@ namespace MIBParser
     {
         public string GetFileEntireText(string filePath)
         {
-            return File.ReadAllText(filePath);
+            return File.ReadAllText(filePath).Trim('\n');
         }
 
         public IEnumerable<string> GetLine(string filePath)
