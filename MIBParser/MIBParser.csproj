@@ -44,8 +44,10 @@
     <Compile Include="IFileReader.cs" />
     <Compile Include="Import.cs" />
     <Compile Include="ImportsLoader.cs" />
+    <Compile Include="Limiter.cs" />
     <Compile Include="MIBTreeExtensions.cs" />
     <Compile Include="MIBNode.cs" />
+    <Compile Include="ObjectType.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="ParserConst.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

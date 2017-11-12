@@ -19,7 +19,9 @@ namespace SMNPAgentStage1
             var root = parser.GenerateTree();
 
             Console.WriteLine(root.GetTreeString("",true));
+            Console.WriteLine(" ");
             //Console.WriteLine(root.GetString());
+            Console.WriteLine(((ObjectType)root.GetMibNodeStack().FirstOrDefault(node => node.NodeName == "sysDescr"))?.ToString());
 
             Console.ReadKey();
         }
