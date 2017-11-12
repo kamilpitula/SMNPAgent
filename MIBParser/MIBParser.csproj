@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="FileReader.cs" />
     <Compile Include="IFileReader.cs" />
+    <Compile Include="IImportsLoader.cs" />
     <Compile Include="Import.cs" />
     <Compile Include="ImportsLoader.cs" />
     <Compile Include="Limiter.cs" />

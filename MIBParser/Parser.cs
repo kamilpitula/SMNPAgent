@@ -27,11 +27,16 @@ namespace MIBParser
         Regex SplitDotNumbers = new Regex(@"\((?<min>[0-9]*)..(?<max>[0-9]*)\)");
         Regex GetNumbers = new Regex(@"[0-9]*\)");
 
-        private readonly IFileReader fileReader;
+        Regex SequenceRegex = new Regex(@"(?<name>.*) \s*::=\s* SEQUENCE((.*)\n)((?s)(?<values>.*?)(?>)})", RegexOptions.Multiline);
+        Regex GetSequenceValuesRegex = new Regex(@"\s+(?<name>\S*)\n\s*(?<value>\S*),", RegexOptions.Multiline); //TODO this regex doesn't work in VS (but works in regex online WTF?)
 
-        public Parser(IFileReader fileReader)
+        private readonly IFileReader fileReader;
+        private readonly IImportsLoader importsLoader;
+
+        public Parser(IFileReader fileReader ,IImportsLoader importsLoader)
         {
             this.fileReader = fileReader;
+            this.importsLoader = importsLoader;
         }
 
         public MIBNode GenerateTree()
@@ -52,6 +57,9 @@ namespace MIBParser
 
             string mibText = fileReader.GetFileEntireText(ParserConst.MIBPath);
 
+            //Load imports
+            var imports = importsLoader.ParseImports(mibText);//TODO load this files
+
             var objectIdentifierMatch = ObjectIdentifierRegex.Matches(mibText);
 
             foreach (Match match in objectIdentifierMatch)
@@ -65,6 +73,17 @@ namespace MIBParser
 
                 var parentNode = masterNode.GetMibNodeStack().FirstOrDefault(node => node.NodeName == parent);
                 parentNode?.AddChild(new MIBNode(value, name, parentNode));
+            }
+
+            var sequenceMatch = SequenceRegex.Matches(mibText);
+            foreach (Match match in sequenceMatch)
+            {
+                var sequenceValues = GetSequenceValuesRegex.Matches(match.Groups["values"].Value);
+                foreach (Match sequenceValue in sequenceValues)
+                {
+                    var name = sequenceValue.Groups["name"].Value;
+                    var value = sequenceValue.Groups["value"].Value;
+                }
             }
 
             var objectTypeMatch = ObjectTypeRegex.Matches(mibText);

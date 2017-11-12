@@ -14,11 +14,12 @@ namespace SMNPAgentStage1
         {
 
             var fileReader = new FileReader();
+            var importsLoader = new ImportsLoader(fileReader);
 
-            var parser = new Parser(fileReader);
+            var parser = new Parser(fileReader, importsLoader);
             var root = parser.GenerateTree();
 
-            Console.WriteLine(root.GetTreeString("",true));
+            Console.WriteLine(root.GetTreeString("", true));
             Console.WriteLine(" ");
             //Console.WriteLine(root.GetString());
             Console.WriteLine(((ObjectType)root.GetMibNodeStack().FirstOrDefault(node => node.NodeName == "sysDescr"))?.ToString());

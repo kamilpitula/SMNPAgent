@@ -11,10 +11,10 @@ namespace MIBParser
         public string Name { get; private set; }
         public IEnumerable<string> Types { get; private set; }
 
-        public Import(string name, string types)
+        public Import(string name, IEnumerable<string> types)
         {
             Name = name;
-            Types = types.Split(',');
+            Types = types;
         }
     }
 }

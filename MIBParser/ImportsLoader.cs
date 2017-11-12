@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace MIBParser
 {
-    public class ImportsLoader
+    public class ImportsLoader : IImportsLoader
     {
-        const string ImportPattern = @"\s{4}(?<name>.+)\s+FROM (?<from>.+)";
+        const string ImportPattern = @"IMPORTS\s*(?<insideImports>[\s\S]* FROM \S*)";
+        private const string valuesPattern = @"((?<what>\S*)\s*)";
         private readonly IFileReader fileReader;
 
         public ImportsLoader(IFileReader fileReader)
@@ -23,29 +25,42 @@ namespace MIBParser
             var imports = ParseImports(text);
             foreach (var import in imports)
             {
-                Console.WriteLine("From file: "+import.Name+" load:");
+                Console.WriteLine("From file: " + import.Name + " load:");
                 foreach (var importType in import.Types)
                 {
-                    Console.WriteLine("  * "+importType);
+                    Console.WriteLine("  * " + importType);
                 }
             }
         }
-        private IEnumerable<Import> ParseImports(string source)
+        public IEnumerable<Import> ParseImports(string source)
         {
             var imports = new List<Import>();
-            var regex = new Regex(ImportPattern, RegexOptions.IgnoreCase);
+            var regex = new Regex(ImportPattern, RegexOptions.Multiline);
+            var valuesRegex = new Regex(valuesPattern, RegexOptions.Multiline);
 
-            var matches = regex.Matches(source);
+            var matches = regex.Match(source).Groups["insideImports"].Value;
+            var values = valuesRegex.Matches(matches);
+            var currentImportsList = new List<string>();
 
-            foreach (Match match in matches)
+            for (int i = 0; i < values.Count; i++)
             {
-                var groups = match.Groups;
-                imports.Add(new Import(groups["from"].ToString(),groups["name"].ToString()));
+
+                var valueString = values[i].Groups["what"].Value.Trim(new char[] { ' ', '\r', '\n', ',' });
+                if (valueString != "FROM")
+                {
+                    currentImportsList.Add(valueString);
+                }
+                else
+                {
+                    imports.Add(new Import(values[i + 1].Groups["what"].Value.Trim(new char[] { ' ', '\r', '\n', ',' }), currentImportsList));
+                    currentImportsList = new List<string>();
+                    i++;
+                }
             }
 
             return imports;
         }
 
-        
+
     }
 }
