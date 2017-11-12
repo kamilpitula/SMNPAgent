@@ -139,7 +139,7 @@ namespace MIBParser
 
         private bool IsObjectComplete(string name, Group typeOfNode, Group access, Group status, Group parent, Group id)
         {
-            return !(string.IsNullOrEmpty(name) && string.IsNullOrEmpty(typeOfNode.ToString()) && string.IsNullOrEmpty(access.ToString()) && string.IsNullOrEmpty(status.ToString()) && string.IsNullOrEmpty(parent.ToString()) && string.IsNullOrEmpty(id.ToString()));
+            return (!string.IsNullOrEmpty(name) && typeOfNode.Success && access.Success && status.Success && parent.Success && id.Success);
         }
     }
 }
