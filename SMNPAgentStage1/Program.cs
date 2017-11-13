@@ -21,8 +21,24 @@ namespace SMNPAgentStage1
 
             Console.WriteLine(root.GetTreeString("", true));
             Console.WriteLine(" ");
-            //Console.WriteLine(root.GetString());
-            Console.WriteLine(((ObjectType)root.GetMibNodeStack().FirstOrDefault(node => node.NodeName == "sysDescr"))?.ToString());
+
+            while (true)
+            {
+                Console.WriteLine("Write node name or OID: ");
+                var nodeName = Console.ReadLine();
+                //Console.WriteLine(root.GetString());
+                try
+                {
+                    Console.WriteLine((root.GetMibNodeStack().FirstOrDefault(node => node.NodeName == nodeName))?.ToString());
+
+                    Console.WriteLine(root.GetMibNodeStack().FirstOrDefault(node => node.GetOID() == nodeName)?.ToString());         
+                }
+                catch (NullReferenceException)
+                {
+                    Console.WriteLine("Node doesn't exist");
+                }
+            }
+            
 
             Console.ReadKey();
         }

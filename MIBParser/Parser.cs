@@ -16,7 +16,7 @@ namespace MIBParser
         Regex TypeOfNode = new Regex(@"(?<=SYNTAX  )(?<syntax>.*)");
         Regex TypeOfAccess = new Regex(@"(?<=ACCESS  )(?<access>.*)");
         Regex Status = new Regex(@"(?<=STATUS  )(?<status>.*)");
-        Regex Description = new Regex(@"(DESCRIPTION\s*)(?<description>[\s\S]*"")", RegexOptions.Multiline);//TODO description regex doesn't work
+        Regex Description = new Regex(@"(DESCRIPTION\s*)(?<description>[\s\S]*"")", RegexOptions.Multiline);
         Regex ParentAndId = new Regex(@"(?<=::= { )(?<parent>.*) (?<parentId>\d+)");
         //Regex SplitSpace = new Regex(@"[a-z|A-Z|0-9]*(?= )");
 
@@ -83,6 +83,8 @@ namespace MIBParser
                 {
                     var name = sequenceValue.Groups["name"].Value;
                     var value = sequenceValue.Groups["value"].Value;
+
+                    //TODO do something with this shit
                 }
             }
 
