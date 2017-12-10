@@ -26,10 +26,10 @@ namespace SMNPAgentStage1
             {
                 Console.WriteLine("Write node name or OID: ");
                 var nodeName = Console.ReadLine();
-                //Console.WriteLine(root.GetString());
+
                 try
                 {
-                    Console.WriteLine((root.GetMibNodeStack().FirstOrDefault(node => node.NodeName == nodeName))?.ToString());
+                    Console.WriteLine(root.GetMibNodeStack().FirstOrDefault(node => node.NodeName == nodeName)?.ToString());
 
                     Console.WriteLine(root.GetMibNodeStack().FirstOrDefault(node => node.GetOID() == nodeName)?.ToString());         
                 }
@@ -38,9 +38,6 @@ namespace SMNPAgentStage1
                     Console.WriteLine("Node doesn't exist");
                 }
             }
-            
-
-            Console.ReadKey();
         }
     }
 }

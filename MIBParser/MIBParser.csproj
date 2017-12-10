@@ -40,18 +40,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BerCoder.cs" />
+    <Compile Include="BerDecoder.cs" />
     <Compile Include="FileReader.cs" />
+    <Compile Include="IBERCoder.cs" />
+    <Compile Include="IBerDecoder.cs" />
     <Compile Include="IFileReader.cs" />
     <Compile Include="IImportsLoader.cs" />
     <Compile Include="Import.cs" />
     <Compile Include="ImportsLoader.cs" />
     <Compile Include="Limiter.cs" />
+    <Compile Include="MessageType.cs" />
     <Compile Include="MIBTreeExtensions.cs" />
     <Compile Include="MIBNode.cs" />
     <Compile Include="ObjectType.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="ParserConst.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SNMPMessage.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
