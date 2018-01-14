@@ -1,7 +1,9 @@
 ﻿namespace MIBParser
 {
-     public enum SNMPMessageTypes
+    public enum SNMPMessageTypes
     {
-        GetRequest, GetResponse, SetRequest
+        GetRequest,
+        GetResponse,
+        SetRequest
     }
 }

@@ -4,11 +4,11 @@ using System.Text;
 
 namespace MIBParser
 {
-    public static class MIBTreeExtensions
+    public static class MibTreeExtensions
     {
-        public static IEnumerable<MIBNode> GetMibNodeStack(this MIBNode root)
+        public static IEnumerable<MibNode> GetMibNodeStack(this MibNode root)
         {
-            var nodes = new Stack<MIBNode>(new[] {root});
+            var nodes = new Stack<MibNode>(new[] {root});
             while (nodes.Any())
             {
                 var node = nodes.Pop();
@@ -17,7 +17,7 @@ namespace MIBParser
             }
         }
 
-        public static string GetLastChildrenString(this MIBNode root, string nodeName = null)
+        public static string GetLastChildrenString(this MibNode root, string nodeName = null)
         {
             var builder = new StringBuilder();
 
@@ -35,7 +35,7 @@ namespace MIBParser
             return builder.ToString();
         }
 
-        public static string GetTreeString(this MIBNode root, string indent, bool last)
+        public static string GetTreeString(this MibNode root, string indent, bool last)
         {
             var builder = new StringBuilder();
             builder.Append(indent);
@@ -57,7 +57,7 @@ namespace MIBParser
             return builder.ToString();
         }
 
-        private static void BuildString(StringBuilder builder, MIBNode child)
+        private static void BuildString(StringBuilder builder, MibNode child)
         {
             var temp = child;
             var idList = new List<int>();

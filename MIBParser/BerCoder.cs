@@ -7,10 +7,10 @@ namespace MIBParser
     {
         public byte[] Encode(SNMPMessage inputMessage)
         {
-            byte[] result = new byte[2];
+            var result = new byte[2];
 
-            int version = 0;
-            int error = 0;
+            var version = 0;
+            var error = 0;
 
             switch (inputMessage.SNMPMessageType)
             {
@@ -53,13 +53,13 @@ namespace MIBParser
 
         public byte[] CodeType(SNMPMessage inputMessage)
         {
-            byte[] value=new byte[0];
+            var value = new byte[0];
             if (inputMessage.OctetStringValue != null)
             {
                 var text = CodeOctetString(inputMessage.OctetStringValue);
                 value = CombineArrays(value, text);
             }
-            if(inputMessage.IntValue!=null)
+            if (inputMessage.IntValue != null)
             {
                 byte[] number;
                 if (inputMessage.AplicationSpecId != 0)
@@ -68,26 +68,21 @@ namespace MIBParser
                 value = CombineArrays(value, number);
             }
             if (inputMessage.Sequence != null)
-            {
                 value = CodeSequence(inputMessage);
-            }
-            if(inputMessage.IsNull)
-            {
+            if (inputMessage.IsNull)
                 value = CodeNull();
-            }
             return value;
         }
 
         private byte[] CodeNull()
         {
-            return new byte[]{0x05,0x00};
+            return new byte[] {0x05, 0x00};
         }
 
         public byte[] CodeOctetString(string input)
         {
-
-            byte[] length = CodeLength(input.Length);
-            byte[] array = new byte[1 + length.Length + input.Length];
+            var length = CodeLength(input.Length);
+            var array = new byte[1 + length.Length + input.Length];
             array[0] = 0x04;
             length.CopyTo(array, 1);
 
@@ -106,7 +101,10 @@ namespace MIBParser
                 array = new byte[3];
                 array[0] = customType;
                 array[1] = 0x01;
-                if (input >= 0) array[2] = Convert.ToByte(input);
+                if (input >= 0)
+                {
+                    array[2] = Convert.ToByte(input);
+                }
                 else
                 {
                     array[2] = Convert.ToByte(input + 128);
@@ -125,7 +123,7 @@ namespace MIBParser
                 }
                 else
                 {
-                    int temp = (int)input + 32768;
+                    var temp = (int) input + 32768;
                     array[2] = Convert.ToByte(temp / 256);
                     array[3] = Convert.ToByte(temp % 256);
                     array[2] |= 0x80;
@@ -139,15 +137,15 @@ namespace MIBParser
                 if (input >= 0)
                 {
                     array[2] = Convert.ToByte(input / 65536);
-                    array[3] = Convert.ToByte((input % 65536) / 256);
-                    array[4] = Convert.ToByte((input % 65536) % 256);
+                    array[3] = Convert.ToByte(input % 65536 / 256);
+                    array[4] = Convert.ToByte(input % 65536 % 256);
                 }
                 else
                 {
-                    int? temp = input + 8388608;
+                    var temp = input + 8388608;
                     array[2] = Convert.ToByte(temp / 65536);
-                    array[3] = Convert.ToByte((temp % 65536) / 256);
-                    array[4] = Convert.ToByte((temp % 65536) % 256);
+                    array[3] = Convert.ToByte(temp % 65536 / 256);
+                    array[4] = Convert.ToByte(temp % 65536 % 256);
                     array[2] |= 0x80;
                 }
             }
@@ -159,17 +157,17 @@ namespace MIBParser
                 if (input >= 0)
                 {
                     array[2] = Convert.ToByte(input / 16777216);
-                    array[3] = Convert.ToByte((input % 16777216) / 65536);
-                    array[4] = Convert.ToByte(((input % 16777216) % 65536) / 256);
-                    array[5] = Convert.ToByte(((input % 16777216) % 65536) % 256);
+                    array[3] = Convert.ToByte(input % 16777216 / 65536);
+                    array[4] = Convert.ToByte(input % 16777216 % 65536 / 256);
+                    array[5] = Convert.ToByte(input % 16777216 % 65536 % 256);
                 }
                 else
                 {
-                    int? temp = input + 2147483647;
+                    var temp = input + 2147483647;
                     array[2] = Convert.ToByte(temp / 16777216);
-                    array[3] = Convert.ToByte((temp % 16777216) / 65536);
-                    array[4] = Convert.ToByte(((temp % 16777216) % 65536) / 256);
-                    array[5] = Convert.ToByte(((temp % 16777216) % 65536) % 256);
+                    array[3] = Convert.ToByte(temp % 16777216 / 65536);
+                    array[4] = Convert.ToByte(temp % 16777216 % 65536 / 256);
+                    array[5] = Convert.ToByte(temp % 16777216 % 65536 % 256);
                 }
             }
 
@@ -181,20 +179,19 @@ namespace MIBParser
 
         public byte[] CodeSequence(SNMPMessage message)
         {
-            byte[] valueInternal=new byte[0];
-            if(message.Sequence!=null)
+            var valueInternal = new byte[0];
+            if (message.Sequence != null)
                 valueInternal = CodeSequence(message.Sequence);
             var newMessage = message;
             newMessage.Sequence = null;
-            byte[] array = CodeType(newMessage);
-            var result =  CombineArrays(valueInternal, array);
+            var array = CodeType(newMessage);
+            var result = CombineArrays(valueInternal, array);
             var length = CodeLength(result.Length);
-            byte[] array2 = new byte[1 + length.Length + result.Length];
+            var array2 = new byte[1 + length.Length + result.Length];
             array2[0] = 0x10;
-            length.CopyTo(array2,1);
-            result.CopyTo(array2,1+length.Length);
+            length.CopyTo(array2, 1);
+            result.CopyTo(array2, 1 + length.Length);
             return array2;
-
         }
 
 
@@ -208,8 +205,8 @@ namespace MIBParser
             }
             else
             {
-                int count = 0;
-                int temp = size;
+                var count = 0;
+                var temp = size;
                 while (temp >= 1)
                 {
                     count++;
@@ -218,18 +215,18 @@ namespace MIBParser
                 array = new byte[count + 1];
                 array[0] = Convert.ToByte(count + 128);
 
-                for (int i = count; i >= 1; i--)
+                for (var i = count; i >= 1; i--)
                 {
                     array[i] = Convert.ToByte(size % 256);
                     size = size / 256;
                 }
             }
             return array;
-
         }
+
         public byte[] CombineArrays(byte[] x, byte[] y)
         {
-            byte[] z = new byte[x.Length + y.Length];
+            var z = new byte[x.Length + y.Length];
             x.CopyTo(z, 0);
             y.CopyTo(z, x.Length);
             return z;
@@ -237,8 +234,8 @@ namespace MIBParser
 
         public byte[] AddSequence(byte[] x)
         {
-            byte[] length = CodeLength(x.Length);
-            byte[] output = new byte[1 + length.Length + x.Length];
+            var length = CodeLength(x.Length);
+            var output = new byte[1 + length.Length + x.Length];
             output[0] = 0x30;
             length.CopyTo(output, 1);
             x.CopyTo(output, 1 + length.Length);
@@ -247,14 +244,12 @@ namespace MIBParser
 
         public byte[] AddSnmpResponsePdu(byte[] x)
         {
-            byte[] length = CodeLength(x.Length);
-            byte[] output = new byte[1 + length.Length + x.Length];
+            var length = CodeLength(x.Length);
+            var output = new byte[1 + length.Length + x.Length];
             output[0] = 0xA2;
             length.CopyTo(output, 1);
             x.CopyTo(output, 1 + length.Length);
             return output;
         }
-
     }
-
 }

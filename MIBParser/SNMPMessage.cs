@@ -2,7 +2,6 @@
 {
     public class SNMPMessage
     {
-
         public SNMPMessageTypes SNMPMessageType { get; set; }
         public int ReqId { get; set; }
         public string ObjectId { get; set; }
@@ -14,6 +13,5 @@
         public int Error { get; set; }
         public byte AplicationSpecId { get; set; }
         public SNMPMessage Sequence { get; set; }
-
     }
 }

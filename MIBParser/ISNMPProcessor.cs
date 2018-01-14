@@ -1,7 +1,7 @@
 ﻿namespace MIBParser
 {
-    public interface ISNMPProcessor
+    public interface ISnmpProcessor
     {
-        byte[] ProcessMessage(byte[] incoming_message);
+        byte[] ProcessMessage(byte[] incomingMessage);
     }
 }

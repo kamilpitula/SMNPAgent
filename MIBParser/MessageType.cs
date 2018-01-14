@@ -2,6 +2,8 @@
 {
     public enum MessageType
     {
-        GetRequest, GetResponse, SetRequest
+        GetRequest,
+        GetResponse,
+        SetRequest
     }
 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace MIBParser
 {
-    public class BerDecoder:IBerDecoder
+    public class BerDecoder : IBerDecoder
     {
         public SNMPMessage Decode(byte[] input) //tu się pewnie typ zmieni
         {
@@ -100,7 +100,7 @@ namespace MIBParser
                     break;
                 case 0x10:
                     getLength(ref input);
-                    SNMPMessage sequence = GetSequence(ref input);
+                    var sequence = GetSequence(ref input);
                     snmpMessage = sequence;
                     break;
                 case 0x05:
@@ -119,24 +119,18 @@ namespace MIBParser
         {
             var result = new SNMPMessage();
             if (input[0] != 0x10)
-            {
                 Console.WriteLine("Zły typ, spodziewano się sequence");
-            }
             var temp = new byte[input.Length];
             Buffer.BlockCopy(input, 0, temp, 0, input.Length);
             //getLength(ref input);
-            var size = (int)input[1];
+            var size = (int) input[1];
             var second = input;
-            if (size<temp.Length-2)
+            if (size < temp.Length - 2)
             {
-
-                
                 var first = input.Take(size + 2).ToArray();
                 second = input.Skip(size + 2).ToArray();
                 getLength(ref first);
                 result.Sequence = GetSequence(ref first);
-                
-                
             }
             DecodeValue(second, result, "internal");
             return result;

@@ -1,32 +1,37 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace MIBParser
 {
-    public class SNMPServer : ISNMPServer
+    public class SNMPServer : ISnmpServer
     {
-        private int port = 161;
-        private int tempReturnPort = 0;
-        private string tempReturnAddres = "127.0.0.1";
+        private const int Port = 161;
         //private BER_coding BER = new BER_coding();
 
-        private SNMPProcessor snmp;
+        private readonly SNMPProcessor snmp;
+        private string tempReturnAddres = "127.0.0.1";
+        private int tempReturnPort;
 
         public SNMPServer(SNMPProcessor snmp)
         {
             this.snmp = snmp;
         }
 
+        public Task RunRecieverLoop()
+        {
+            var recThread = new Task(RecieverLoop);
+            return recThread;
+        }
+
         public bool Send(string ip, byte[] dataToSend)
         {
-            bool result = false;
+            var result = false;
 
-            Socket OutputSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            IPAddress address = IPAddress.Parse(ip);
-            IPEndPoint endpoint = new IPEndPoint(address, tempReturnPort);
+            var OutputSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            var address = IPAddress.Parse(ip);
+            var endpoint = new IPEndPoint(address, tempReturnPort);
 
             try
             {
@@ -46,8 +51,8 @@ namespace MIBParser
         //to pewnie będzie latać na swoim wątku
         public byte[] Recieve()
         {
-            UdpClient listener = new UdpClient(port);
-            IPEndPoint groupEP = new IPEndPoint(IPAddress.Any, port);
+            var listener = new UdpClient(Port);
+            var groupEP = new IPEndPoint(IPAddress.Any, Port);
             byte[] receiveByteArray;
 
             receiveByteArray = listener.Receive(ref groupEP);
@@ -63,19 +68,10 @@ namespace MIBParser
         {
             while (true)
             {
-                byte[] temp = snmp.ProcessMessage(Recieve());
+                var temp = snmp.ProcessMessage(Recieve());
                 if (temp != null)
-                {
                     Send(tempReturnAddres, temp);
-                }
             }
         }
-
-        public Task RunRecieverLoop()
-        {
-            Task recThread = new Task(RecieverLoop);
-            return recThread;
-        }
-
     }
 }

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MIBParser
 {
@@ -16,13 +12,11 @@ namespace MIBParser
 
         public IEnumerable<string> GetLine(string filePath)
         {
-            using (StreamReader sr = File.OpenText(filePath))
+            using (var sr = File.OpenText(filePath))
             {
                 string line;
                 while ((line = sr.ReadLine()) != null)
-                {
                     yield return line;
-                }
             }
         }
     }

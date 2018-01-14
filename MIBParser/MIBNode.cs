@@ -1,29 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
+﻿using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace MIBParser
 {
-    public class MIBNode
+    public class MibNode
     {
-        public List<MIBNode> Children { get; private set; }
-        public MIBNode Parent { get; private set; }
-        public int NodeId { get; private set; }
-        public string NodeName { get; private set; }
         //private Limiter = new Limiter();
 
-        public MIBNode(int nodeId, string nodeName,MIBNode parent)
+        public MibNode(int nodeId, string nodeName, MibNode parent)
         {
             NodeId = nodeId;
             NodeName = nodeName;
-            Children = new List<MIBNode>();
+            Children = new List<MibNode>();
             Parent = parent;
         }
 
-        public void AddChild(MIBNode child)
+        public List<MibNode> Children { get; }
+        public MibNode Parent { get; }
+        public int NodeId { get; }
+        public string NodeName { get; }
+
+        public void AddChild(MibNode child)
         {
             Children.Add(child);
         }
@@ -41,10 +38,10 @@ namespace MIBParser
         {
             string result;
             if (Parent != null)
-                result = Parent.GetOID() + "." + NodeId.ToString();
+                result = Parent.GetOID() + "." + NodeId;
             else
                 result = NodeId.ToString();
-            
+
             return result;
         }
     }

@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MIBParser
+﻿namespace MIBParser
 {
     public class Limiter
     {
-        private int min;
-        private int max;
+        private readonly int max;
+        private readonly int min;
+
         public Limiter(int min, int max)
         {
             this.min = min;

@@ -2,7 +2,7 @@
 
 namespace MIBParser
 {
-    public interface ISNMPServer
+    public interface ISnmpServer
     {
         Task RunRecieverLoop();
     }
