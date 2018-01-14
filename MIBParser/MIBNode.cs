@@ -13,6 +13,7 @@ namespace MIBParser
         public MIBNode Parent { get; private set; }
         public int NodeId { get; private set; }
         public string NodeName { get; private set; }
+        //private Limiter = new Limiter();
 
         public MIBNode(int nodeId, string nodeName,MIBNode parent)
         {

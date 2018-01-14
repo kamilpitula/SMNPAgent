@@ -4,101 +4,72 @@ using System.Text;
 
 namespace MIBParser
 {
-    public class BerDecoder
+    public class BerDecoder:IBerDecoder
     {
         public SNMPMessage Decode(byte[] input) //tu się pewnie typ zmieni
         {
             Console.WriteLine(BitConverter.ToString(input));
-            SNMPMessage snmp_message = new SNMPMessage();
-            int snmp_version = 0;
-            string community_string = "";
+            var snmpMessage = new SNMPMessage();
 
-            int request_id = 0;
-            int error = 0;
-            int error_index = 0;
-
-            string object_id = "";
-            byte[] raw_obj_id = new byte[1];
-
-            int value_int = 0;
-            string value_string = "";
+            var rawObjId = new byte[1];
 
             switch (input[0])
             {
-                case 0x30:  //snmp
-                    Console.WriteLine("Typ wiadomości SNMP o długości: " + get_length(ref input));
+                case 0x30: //snmp
+                    Console.WriteLine("Typ wiadomości SNMP o długości: " + getLength(ref input));
 
-                    snmp_version = get_int(ref input);
-                    community_string = get_octet_string(ref input);
-
-                    snmp_message.CommunityString = community_string;
-
-                    switch (input[0])
+                    if (input != null)
                     {
-                        case 0xA0: //SNMP get
-                            get_length(ref input);
+                        GetInt(ref input);
+                        var communityString = GetOctetString(ref input);
 
-                            snmp_message.SNMPMessageType = MessageType.GetRequest;
+                        snmpMessage.CommunityString = communityString;
 
-                            request_id = get_int(ref input);
-                            snmp_message.ReqId = request_id;
+                        int requestId;
+                        string objectId;
+                        switch (input[0])
+                        {
+                            case 0xA0: //SNMP get
+                                getLength(ref input);
 
-                            error = get_int(ref input);
-                            error_index = get_int(ref input);
+                                snmpMessage.SNMPMessageType = SNMPMessageTypes.GetRequest;
 
-                            strip_sequence(ref input);
-                            strip_sequence(ref input);
+                                requestId = GetInt(ref input);
+                                snmpMessage.ReqId = requestId;
 
-                            object_id = get_object_id(ref input, ref raw_obj_id);
-                            snmp_message.ObjectId = object_id;
-                            snmp_message.RawObjectId = raw_obj_id;
+                                StripSequence(ref input);
+                                StripSequence(ref input);
 
-                            Console.WriteLine("Wiadmość typu SNMP GetRequest dla object_id: " + object_id);
+                                objectId = GetObjectId(ref input, ref rawObjId);
+                                snmpMessage.ObjectId = objectId;
+                                snmpMessage.RawObjectId = rawObjId;
 
-                            break;
+                                Console.WriteLine("Wiadmość typu SNMP GetRequest dla object_id: " + objectId);
 
-                        case 0xA3: //SNMP set
-                            get_length(ref input);
+                                break;
 
-                            snmp_message.SNMPMessageType = MessageType.SetRequest;
+                            case 0xA3: //SNMP set
+                                getLength(ref input);
 
-                            request_id = get_int(ref input);
-                            snmp_message.ReqId = request_id;
+                                snmpMessage.SNMPMessageType = SNMPMessageTypes.SetRequest;
 
-                            error = get_int(ref input);
-                            error_index = get_int(ref input);
+                                requestId = GetInt(ref input);
+                                snmpMessage.ReqId = requestId;
 
-                            strip_sequence(ref input);
-                            strip_sequence(ref input);
+                                StripSequence(ref input);
+                                StripSequence(ref input);
 
-                            // TODO: może zrób wiele var bindsów
+                                objectId = GetObjectId(ref input, ref rawObjId);
+                                snmpMessage.ObjectId = objectId;
+                                snmpMessage.RawObjectId = rawObjId;
+                                input = DecodeValue(input, snmpMessage, objectId);
 
-                            object_id = get_object_id(ref input, ref raw_obj_id);
-                            snmp_message.ObjectId = object_id;
-                            snmp_message.RawObjectId = raw_obj_id;
+                                break;
 
-                            switch (input[0])
-                            {
-                                case 0x02:
-                                    value_int = get_int(ref input);
-                                    snmp_message.IntValue = value_int;
-                                    Console.WriteLine("Wiadmość typu SNMP SetRequest dla object_id: " + object_id + " i wartości: " + value_int);
-                                    break;
-                                case 0x04:
-                                    value_string = get_octet_string(ref input);
-                                    snmp_message.StringValue = value_string;
-                                    Console.WriteLine("Wiadmość typu SNMP SetRequest dla object_id: " + object_id + " i wartości: " + value_string);
-                                    break;
-                                default:
-                                    Console.WriteLine("Typ wartości nie jest obsługiwany");
-                                    break;
-                            }
-
-                            break;
-
-                        default:
-                            Console.WriteLine("Typ zapytania SNMP nie jest obsługiwany");
-                            break;
+                            default:
+                                Console.WriteLine("Typ zapytania SNMP nie jest obsługiwany");
+                                break;
+                        }
                     }
 
                     //Console.WriteLine(BitConverter.ToString(input));
@@ -108,17 +79,77 @@ namespace MIBParser
                     Console.WriteLine("Typ wiadomości nie jest obsługiwany");
                     break;
             }
-            return snmp_message;
+            return snmpMessage;
         }
 
-        private void strip_sequence(ref byte[] input)
+        public byte[] DecodeValue(byte[] input, SNMPMessage snmpMessage, string objectId)
         {
-            get_length(ref input);
+            switch (input[0])
+            {
+                case 0x02:
+                    var valueInt = GetInt(ref input);
+                    snmpMessage.IntValue = valueInt;
+                    Console.WriteLine("Wiadmość typu SNMP SetRequest dla object_id: " + objectId +
+                                      " i wartości: " + valueInt);
+                    break;
+                case 0x04:
+                    var valueString = GetOctetString(ref input);
+                    snmpMessage.OctetStringValue = valueString;
+                    Console.WriteLine("Wiadmość typu SNMP SetRequest dla object_id: " + objectId +
+                                      " i wartości: " + valueString);
+                    break;
+                case 0x10:
+                    getLength(ref input);
+                    SNMPMessage sequence = GetSequence(ref input);
+                    snmpMessage = sequence;
+                    break;
+                case 0x05:
+                    snmpMessage.IsNull = true;
+                    Console.WriteLine("Wiadomosc typu SNMP SetRequest dla object_i: " + objectId + " o wartosci null");
+                    break;
+                default:
+                    Console.WriteLine("Typ wartości nie jest obsługiwany");
+                    break;
+            }
+
+            return input;
         }
 
-        private string get_object_id(ref byte[] input, ref byte[] raw_obj_id)
+        public SNMPMessage GetSequence(ref byte[] input)
         {
-            string obj_id = "";
+            var result = new SNMPMessage();
+            if (input[0] != 0x10)
+            {
+                Console.WriteLine("Zły typ, spodziewano się sequence");
+            }
+            var temp = new byte[input.Length];
+            Buffer.BlockCopy(input, 0, temp, 0, input.Length);
+            //getLength(ref input);
+            var size = (int)input[1];
+            var second = input;
+            if (size<temp.Length-2)
+            {
+
+                
+                var first = input.Take(size + 2).ToArray();
+                second = input.Skip(size + 2).ToArray();
+                getLength(ref first);
+                result.Sequence = GetSequence(ref first);
+                
+                
+            }
+            DecodeValue(second, result, "internal");
+            return result;
+        }
+
+        private void StripSequence(ref byte[] input)
+        {
+            getLength(ref input);
+        }
+
+        public string GetObjectId(ref byte[] input, ref byte[] rawObjId)
+        {
+            var objId = "";
 
             if (input[0] != 0x06)
             {
@@ -126,35 +157,32 @@ namespace MIBParser
                 return "error";
             }
 
-            byte[] temp = new byte[input.Length];
+            var temp = new byte[input.Length];
             Buffer.BlockCopy(input, 0, temp, 0, input.Length);
 
-            int size = get_length(ref input);
-            raw_obj_id = new byte[size + (temp.Length - input.Length)];
-            Buffer.BlockCopy(temp, 0, raw_obj_id, 0, size + (temp.Length - input.Length));
+            var size = getLength(ref input);
+            rawObjId = new byte[size + (temp.Length - input.Length)];
+            Buffer.BlockCopy(temp, 0, rawObjId, 0, size + (temp.Length - input.Length));
 
-            for (int i = 0; i < size; i++)
-            {
-                if (input[i] == 0x2B) obj_id += "1.3";
-                else obj_id += "." + input[i].ToString();
-            }
+            for (var i = 0; i < size; i++)
+                if (input[i] == 0x2B) objId += "1.3";
+                else objId += "." + input[i];
 
-            Console.WriteLine("Object id: " + obj_id + " o długości:" + size);
+            Console.WriteLine("Object id: " + objId + " o długości:" + size);
 
             input = input.Skip(size).ToArray();
 
-            return obj_id;
+            return objId;
         }
-        private int get_length(ref byte[] input)
+
+        private int getLength(ref byte[] input)
         {
-            int size = 0;
+            var size = 0;
             if (input[1] >= 128)
             {
-                for (int i = 0; i < Convert.ToInt32(input[1] & 0x7F); i++)
-                {
+                for (var i = 0; i < Convert.ToInt32(input[1] & 0x7F); i++)
                     if (i == 0) size = Convert.ToInt32(input[2]);
                     else size = size * 256 + Convert.ToInt32(input[2 + i]);
-                }
                 input = input.Skip(2 + Convert.ToInt32(input[1] & 0x7F)).ToArray();
             }
             else
@@ -164,42 +192,39 @@ namespace MIBParser
             }
 
 
-
             return size;
         }
-        private int get_int(ref byte[] input)
+
+        public int GetInt(ref byte[] input)
         {
             if (input[0] != 0x02)
             {
                 Console.WriteLine("Zły typ, spodziwano się inta");
                 return -1;
             }
-            int value = 0;
-            int length = get_length(ref input);
-            for (int i = 0; i < length; i++)
-            {
+            var value = 0;
+            var length = getLength(ref input);
+            for (var i = 0; i < length; i++)
                 if (i == 0) value = Convert.ToInt32(input[i] & 0x7F);
                 else value = value * 256 + Convert.ToInt32(input[i]);
-            }
-            value = value - Convert.ToInt32((input[0] & 0x80) << 8 * (length - 1));
+            value = value - Convert.ToInt32((input[0] & 0x80) << (8 * (length - 1)));
             Console.WriteLine("Int o długości: " + length + " i wartości: " + value);
             input = input.Skip(length).ToArray();
             return value;
         }
 
-        private string get_octet_string(ref byte[] input)
+        public string GetOctetString(ref byte[] input)
         {
             if (input[0] != 0x04)
             {
                 Console.WriteLine("Zły typ, spodziwano się stringa");
                 return "error";
             }
-            string value = "";
-            int length = get_length(ref input);
-            byte[] my_string = new byte[length];
-            Array.Copy(input, 0, my_string, 0, length);
-            Console.WriteLine("Octet string: " + Encoding.ASCII.GetString(my_string) + " o długości:" + length);
-            value = Encoding.ASCII.GetString(my_string);
+            var length = getLength(ref input);
+            var myString = new byte[length];
+            Array.Copy(input, 0, myString, 0, length);
+            Console.WriteLine("Octet string: " + Encoding.ASCII.GetString(myString) + " o długości:" + length);
+            var value = Encoding.ASCII.GetString(myString);
             input = input.Skip(length).ToArray();
             return value;
         }

@@ -106,6 +106,14 @@ namespace MIBParser
 
                     var parentNode = masterNode.GetMibNodeStack().FirstOrDefault(node => node.NodeName == parentName.ToString());
 
+                    AccessTypes accessType;
+                    if (access.Value.Contains("read-write"))
+                        accessType = AccessTypes.Read_write;
+                    else if (access.Value.Contains("read-only"))
+                        accessType = AccessTypes.Read_only;
+                    else
+                        accessType = AccessTypes.No_access;
+
                     if (typeOfNode.ToString().Contains("{"))
                     {
                         var valueOfType = ComplexTypeOfNode.Match(match.Value).Value;
@@ -117,7 +125,7 @@ namespace MIBParser
 
                         var limiter = new Limiter(int.Parse(min), int.Parse(max));
 
-                        parentNode?.AddChild(new ObjectType(idParsed, name, parentNode, typeOfNode.Value, access.Value, status.Value, description.Value, limiter));
+                        parentNode?.AddChild(new ObjectType(idParsed, name, parentNode, typeOfNode.Value, accessType, status.Value, description.Value, limiter));
 
                     }
                     else if (typeOfNode.ToString().Contains(".."))
@@ -127,12 +135,12 @@ namespace MIBParser
                         var max = numbers.Groups["max"].Value;
                         var limiter = new Limiter(int.Parse(min), int.Parse(max));
 
-                        parentNode?.AddChild(new ObjectType(idParsed, name, parentNode, typeOfNode.Value, access.Value, status.Value, description.Value, limiter));
+                        parentNode?.AddChild(new ObjectType(idParsed, name, parentNode, typeOfNode.Value, accessType, status.Value, description.Value, limiter));
 
                     }
                     else
                     {
-                        parentNode?.AddChild(new ObjectType(idParsed, name, parentNode, typeOfNode.Value, access.Value, status.Value, description.Value));
+                        parentNode?.AddChild(new ObjectType(idParsed, name, parentNode, typeOfNode.Value, accessType, status.Value, description.Value));
                     }
                 }
             }

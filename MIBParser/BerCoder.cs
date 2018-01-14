@@ -14,21 +14,12 @@ namespace MIBParser
 
             switch (inputMessage.SNMPMessageType)
             {
-                case MessageType.GetResponse:
+                case SNMPMessageTypes.GetResponse:
                 {
                     byte[] value;
 
 
-                    if (inputMessage.StringValue != null)
-                    {
-                        value = CodeOctetString(inputMessage.StringValue);
-                    }
-                    else
-                    {
-                        if (inputMessage.AplicationSpecId != 0)
-                            value = CodeInt(inputMessage.IntValue, inputMessage.AplicationSpecId);
-                        else value = CodeInt(inputMessage.IntValue);
-                    }
+                    value = CodeType(inputMessage);
 
                     result = CombineArrays(inputMessage.RawObjectId, value);
 
@@ -60,6 +51,38 @@ namespace MIBParser
             return result;
         }
 
+        public byte[] CodeType(SNMPMessage inputMessage)
+        {
+            byte[] value=new byte[0];
+            if (inputMessage.OctetStringValue != null)
+            {
+                var text = CodeOctetString(inputMessage.OctetStringValue);
+                value = CombineArrays(value, text);
+            }
+            if(inputMessage.IntValue!=null)
+            {
+                byte[] number;
+                if (inputMessage.AplicationSpecId != 0)
+                    number = CodeInt(inputMessage.IntValue, inputMessage.AplicationSpecId);
+                else number = CodeInt(inputMessage.IntValue);
+                value = CombineArrays(value, number);
+            }
+            if (inputMessage.Sequence != null)
+            {
+                value = CodeSequence(inputMessage);
+            }
+            if(inputMessage.IsNull)
+            {
+                value = CodeNull();
+            }
+            return value;
+        }
+
+        private byte[] CodeNull()
+        {
+            return new byte[]{0x05,0x00};
+        }
+
         public byte[] CodeOctetString(string input)
         {
 
@@ -68,21 +91,20 @@ namespace MIBParser
             array[0] = 0x04;
             length.CopyTo(array, 1);
 
-            byte[] temp = new byte[input.Length];
-            temp = Encoding.ASCII.GetBytes(input);
+            var temp = Encoding.ASCII.GetBytes(input);
             temp.CopyTo(array, 1 + length.Length);
 
             Console.WriteLine("String: " + input + " to: " + BitConverter.ToString(array));
             return array;
         }
 
-        public byte[] CodeInt(int input, byte custom_type = 0x02)
+        public byte[] CodeInt(int? input, byte customType = 0x02)
         {
             byte[] array;
             if (input <= 127 && input > -128)
             {
                 array = new byte[3];
-                array[0] = custom_type;
+                array[0] = customType;
                 array[1] = 0x01;
                 if (input >= 0) array[2] = Convert.ToByte(input);
                 else
@@ -94,7 +116,7 @@ namespace MIBParser
             else if (input <= 32767 && input > -32768)
             {
                 array = new byte[4];
-                array[0] = custom_type;
+                array[0] = customType;
                 array[1] = 0x02;
                 if (input >= 0)
                 {
@@ -103,7 +125,7 @@ namespace MIBParser
                 }
                 else
                 {
-                    int temp = input + 32768;
+                    int temp = (int)input + 32768;
                     array[2] = Convert.ToByte(temp / 256);
                     array[3] = Convert.ToByte(temp % 256);
                     array[2] |= 0x80;
@@ -112,7 +134,7 @@ namespace MIBParser
             else if (input <= 8388607 && input > -8388608)
             {
                 array = new byte[5];
-                array[0] = custom_type;
+                array[0] = customType;
                 array[1] = 0x03;
                 if (input >= 0)
                 {
@@ -122,7 +144,7 @@ namespace MIBParser
                 }
                 else
                 {
-                    int temp = input + 8388608;
+                    int? temp = input + 8388608;
                     array[2] = Convert.ToByte(temp / 65536);
                     array[3] = Convert.ToByte((temp % 65536) / 256);
                     array[4] = Convert.ToByte((temp % 65536) % 256);
@@ -132,7 +154,7 @@ namespace MIBParser
             else
             {
                 array = new byte[6];
-                array[0] = custom_type;
+                array[0] = customType;
                 array[1] = 0x04;
                 if (input >= 0)
                 {
@@ -143,7 +165,7 @@ namespace MIBParser
                 }
                 else
                 {
-                    int temp = input + 2147483647;
+                    int? temp = input + 2147483647;
                     array[2] = Convert.ToByte(temp / 16777216);
                     array[3] = Convert.ToByte((temp % 16777216) / 65536);
                     array[4] = Convert.ToByte(((temp % 16777216) % 65536) / 256);
@@ -155,6 +177,24 @@ namespace MIBParser
             Console.WriteLine("Integer: " + BitConverter.ToString(array));
 
             return array;
+        }
+
+        public byte[] CodeSequence(SNMPMessage message)
+        {
+            byte[] valueInternal=new byte[0];
+            if(message.Sequence!=null)
+                valueInternal = CodeSequence(message.Sequence);
+            var newMessage = message;
+            newMessage.Sequence = null;
+            byte[] array = CodeType(newMessage);
+            var result =  CombineArrays(valueInternal, array);
+            var length = CodeLength(result.Length);
+            byte[] array2 = new byte[1 + length.Length + result.Length];
+            array2[0] = 0x10;
+            length.CopyTo(array2,1);
+            result.CopyTo(array2,1+length.Length);
+            return array2;
+
         }
 
 
