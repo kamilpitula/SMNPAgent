@@ -89,7 +89,7 @@ namespace MIBParser
                     var name = sequenceValue.Groups["name"].Value;
                     var value = sequenceValue.Groups["value"].Value;
 
-                    //TODO do something with this shit
+                    //TODO 
                 }
             }
 
